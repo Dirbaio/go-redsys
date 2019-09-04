@@ -21,8 +21,9 @@ type Options struct {
 }
 
 type Client interface {
-	DoRESTRequest(ctx context.Context, req *Request) (*Response, error)
-	SignRequestJSON(req *Request) (*SignedJSONRequest, error)
+	DoXMLRequest(ctx context.Context, req *Request) (*Response, error)
+	SignJSONRequest(req *Request) (*SignedJSON, error)
+	ValidateJSONResponse(s *SignedJSON) (*Response, error)
 }
 
 type client struct {
@@ -61,7 +62,7 @@ func New(opts Options) (Client, error) {
 	}, nil
 }
 
-func (c *client) signData(data []byte, id string) string {
+func (c *client) signData(data []byte, id string) []byte {
 	var plaintext [16]byte
 	copy(plaintext[:], []byte(id))
 
@@ -71,5 +72,5 @@ func (c *client) signData(data []byte, id string) string {
 
 	h := hmac.New(sha256.New, key2[:])
 	_, _ = h.Write(data)
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+	return h.Sum(nil)
 }

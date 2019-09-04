@@ -2,6 +2,7 @@ package redsys
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func (c *client) DoRESTRequest(ctx context.Context, req *Request) (*Response, error) {
+func (c *client) DoXMLRequest(ctx context.Context, req *Request) (*Response, error) {
 	req.MerchantCode = c.MerchantCode
 	req.Terminal = c.Terminal
 
@@ -56,7 +57,7 @@ func (c *client) signRequestXML(req *Request) string {
 		Signature        string   `xml:"DS_SIGNATURE"`
 	}{
 		Request:          x,
-		Signature:        c.signData(x, req.OperationID),
+		Signature:        base64.StdEncoding.EncodeToString(c.signData(x, req.OperationID)),
 		SignatureVersion: "HMAC_SHA256_V1",
 	})
 	if err != nil {
